@@ -47,10 +47,9 @@ def rotate_pattern_bilinear(
         y_rotated,
         z_rotated,
     )
-
-    coords_rotated = np.vstack(
-        (theta_grid_rotated.flatten(), phi_grid_rotated.flatten()),
-    ).T
+    phi_grid_rotated.resize((phi_resolution * theta_resolution, 1))
+    theta_grid_rotated.resize((phi_resolution * theta_resolution, 1))
+    coords_rotated = np.hstack((theta_grid_rotated, phi_grid_rotated))
 
     interpolator = RegularGridInterpolator(
         (colatitude, longitude),
