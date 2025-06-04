@@ -200,7 +200,7 @@ def extract_theta_cone(
         Theta must lie in [0, np.pi].
     """
     theta_resolution = pattern.shape[-2]
-    idx = int(np.round(theta * (theta_resolution - 1)) / np.pi)  # pyright: ignore[reportAny]
+    idx = int(np.round(theta * (theta_resolution - 1) / np.pi))  # pyright: ignore[reportAny]
     phi_bound = 1 if endpoint else 0
     theta_cone = np.concatenate(
         (pattern[..., idx : idx + 1, :], pattern[..., idx : idx + 1, 0:phi_bound]),
