@@ -1,20 +1,18 @@
 import numpy as np
+import numpy.typing as npt
 
-from pylobe.utils import build_equiangular_grid, Axis
-from pylobe.pattern import linear_array_factor
+from pylobe.utils import Axis
 from pylobe.transform import (
     extract_phi_plane,
     extract_theta_cone,
-    linear_to_db,
     rotate_pattern_bilinear,
     pad_spherical,
 )
 
 
 class TestTransform:
-    def test_extract_phi(self):
-        pattern = np.arange(110).reshape(11, 10).astype(dtype=np.float32)
-        result = extract_phi_plane(pattern, 0, endpoint=False)
+    def test_extract_phi(self, simple_grid: npt.NDArray[np.floating]):
+        result = extract_phi_plane(simple_grid, 0, endpoint=False)
         expected = np.array(
             [
                 0,
@@ -41,17 +39,15 @@ class TestTransform:
         ).astype(dtype=np.float32)
         assert np.allclose(result.squeeze(), expected)
 
-    def test_extract_theta(self):
-        pattern = np.arange(110).reshape(11, 10).astype(dtype=np.float32)
-        result = extract_theta_cone(pattern, np.pi / 2, endpoint=False)
+    def test_extract_theta(self, simple_grid: npt.NDArray[np.floating]):
+        result = extract_theta_cone(simple_grid, np.pi / 2, endpoint=False)
         expected = np.array([50, 51, 52, 53, 54, 55, 56, 57, 58, 59]).astype(
             dtype=np.float32
         )
         assert np.allclose(result.squeeze(), expected)
 
-    def test_pad_spherical(self):
-        pattern = np.arange(110).reshape(11, 10).astype(dtype=np.float32)
-        result = pad_spherical(pattern, pad_widths=[(2, 3), (3, 0)])
+    def test_pad_spherical(self, simple_grid: npt.NDArray[np.floating]):
+        result = pad_spherical(simple_grid, pad_widths=[(2, 3), (3, 0)])
         expected = np.array(
             [
                 [22, 23, 24, 25, 26, 27, 28, 29, 20, 21, 22, 23, 24],
@@ -74,31 +70,15 @@ class TestTransform:
         )
         assert np.allclose(result, expected)
 
-    def test_rotate_bilinear(self):
-        _, theta_grid = build_equiangular_grid()
-        pattern = linear_to_db(
-            np.square(
-                np.abs(
-                    linear_array_factor(
-                        theta_grid,
-                        kd=np.complex64(1.0),
-                        beta=np.zeros(1),
-                        num_elements=5,
-                    )
-                )
-            ),
-        )
+    def test_rotate_bilinear(self, intensity: npt.NDArray[np.floating]):
         rotated_pattern = rotate_pattern_bilinear(
-            pattern,
+            intensity,
             angles=[np.pi / 2],
             axes=[Axis.Y],
         )
-
         rerotated_pattern = rotate_pattern_bilinear(
             rotated_pattern,
             angles=[-np.pi / 2],
             axes=[Axis.Y],
         )
-
-        # rotation introduces noise
-        assert np.allclose(rerotated_pattern, pattern, rtol=1e-2)
+        assert np.allclose(rerotated_pattern, intensity, rtol=1e-2)

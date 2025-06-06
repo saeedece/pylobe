@@ -1,11 +1,6 @@
 import numpy as np
-from pylobe.pattern import linear_array_factor
-from pylobe.utils import (
-    FullPattern,
-    HorizontalSlice,
-    VerticalSlice,
-    build_equiangular_grid,
-)
+import numpy.typing as npt
+
 from pylobe.interpolate import (
     summing,
     bilinear,
@@ -13,31 +8,12 @@ from pylobe.interpolate import (
     horizontal_projection,
     exponential,
 )
-from pylobe.transform import (
-    extract_phi_plane,
-    extract_theta_cone,
-    linear_to_db,
-)
 
 
-PATTERN = linear_to_db(
-    np.square(
-        np.abs(
-            linear_array_factor(
-                build_equiangular_grid()[1],
-                kd=np.complex64(1.0),
-                beta=np.zeros(1),
-                num_elements=5,
-            )
-        )
-    ),
-    clip_value=-100,
-)
-VERTICAL_SLICE = extract_phi_plane(PATTERN, 0, endpoint=False).squeeze()
-HORIZONTAL_SLICE = extract_theta_cone(PATTERN, 0, endpoint=False).squeeze()
-
-
-def naive_summing(vertical_slice: VerticalSlice, horizontal_slice: HorizontalSlice):
+def naive_summing(
+    vertical_slice: npt.NDArray[np.floating],
+    horizontal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     theta_resolution = (vertical_slice.size // 2) + 1
     phi_resolution = horizontal_slice.size
     pattern = np.empty((theta_resolution, phi_resolution))
@@ -50,9 +26,9 @@ def naive_summing(vertical_slice: VerticalSlice, horizontal_slice: HorizontalSli
 
 
 def naive_bilinear(
-    vertical_slice: VerticalSlice,
-    horizontal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizontal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     theta_resolution = (vertical_slice.size // 2) + 1
     phi_resolution = horizontal_slice.size
     G = np.empty((theta_resolution, phi_resolution))
@@ -96,9 +72,9 @@ def naive_bilinear(
 
 
 def naive_weighted_bilinear(
-    vertical_slice: VerticalSlice,
-    horizontal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizontal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     theta_resolution = (vertical_slice.size // 2) + 1
     phi_resolution = horizontal_slice.size
     G = np.empty((theta_resolution, phi_resolution))
@@ -151,9 +127,9 @@ def naive_weighted_bilinear(
 
 
 def naive_horizontal_projection(
-    vertical_slice: VerticalSlice,
-    horizontal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizontal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     theta_resolution = (vertical_slice.size // 2) + 1
     phi_resolution = horizontal_slice.size
     G = np.empty((theta_resolution, phi_resolution))
@@ -192,30 +168,60 @@ def naive_horizontal_projection(
 
 
 class TestInterpolator:
-    def test_summing(self):
-        vectorized_pattern = summing(VERTICAL_SLICE, HORIZONTAL_SLICE)
-        naive_pattern = naive_summing(VERTICAL_SLICE, HORIZONTAL_SLICE)
+    def test_summing(
+        self,
+        slice_xz: npt.NDArray[np.floating],
+        slice_xy: npt.NDArray[np.floating],
+        intensity: npt.NDArray[np.floating],
+    ):
+        slice_xz, slice_xy = slice_xz.squeeze(), slice_xy.squeeze()
+        vectorized_pattern = summing(slice_xz, slice_xy)
+        naive_pattern = naive_summing(slice_xz, slice_xy)
         assert np.allclose(vectorized_pattern, naive_pattern)
-        assert np.allclose(vectorized_pattern, PATTERN, rtol=1e0)
+        assert np.allclose(vectorized_pattern, intensity, rtol=1e0)
 
-    def test_bilinear(self):
-        vectorized_pattern = bilinear(VERTICAL_SLICE, HORIZONTAL_SLICE)
-        naive_pattern = naive_bilinear(VERTICAL_SLICE, HORIZONTAL_SLICE)
+    def test_bilinear(
+        self,
+        slice_xz: npt.NDArray[np.floating],
+        slice_xy: npt.NDArray[np.floating],
+        intensity: npt.NDArray[np.floating],
+    ):
+        slice_xz, slice_xy = slice_xz.squeeze(), slice_xy.squeeze()
+        vectorized_pattern = bilinear(slice_xz, slice_xy)
+        naive_pattern = naive_bilinear(slice_xz, slice_xy)
         assert np.allclose(vectorized_pattern, naive_pattern)
-        assert np.allclose(vectorized_pattern, PATTERN, rtol=1e0)
+        assert np.allclose(vectorized_pattern, intensity, rtol=1e0)
 
-    def test_weighted_bilinear(self):
-        vectorized_pattern = weighted_bilinear(VERTICAL_SLICE, HORIZONTAL_SLICE)
-        naive_pattern = naive_weighted_bilinear(VERTICAL_SLICE, HORIZONTAL_SLICE)
+    def test_weighted_bilinear(
+        self,
+        slice_xz: npt.NDArray[np.floating],
+        slice_xy: npt.NDArray[np.floating],
+        intensity: npt.NDArray[np.floating],
+    ):
+        slice_xz, slice_xy = slice_xz.squeeze(), slice_xy.squeeze()
+        vectorized_pattern = weighted_bilinear(slice_xz, slice_xy)
+        naive_pattern = naive_weighted_bilinear(slice_xz, slice_xy)
         assert np.allclose(vectorized_pattern, naive_pattern)
-        assert np.allclose(vectorized_pattern, PATTERN, rtol=1e0)
+        assert np.allclose(vectorized_pattern, intensity, rtol=1e0)
 
-    def test_horizontal_projection(self):
-        vectorized_pattern = horizontal_projection(VERTICAL_SLICE, HORIZONTAL_SLICE)
-        naive_pattern = naive_horizontal_projection(VERTICAL_SLICE, HORIZONTAL_SLICE)
+    def test_horizontal_projection(
+        self,
+        slice_xz: npt.NDArray[np.floating],
+        slice_xy: npt.NDArray[np.floating],
+        intensity: npt.NDArray[np.floating],
+    ):
+        slice_xz, slice_xy = slice_xz.squeeze(), slice_xy.squeeze()
+        vectorized_pattern = horizontal_projection(slice_xz, slice_xy)
+        naive_pattern = naive_horizontal_projection(slice_xz, slice_xy)
         assert np.allclose(vectorized_pattern, naive_pattern)
-        assert np.allclose(vectorized_pattern, PATTERN)
+        assert np.allclose(vectorized_pattern, intensity)
 
-    def test_exponential(self):
-        vectorized_pattern = exponential(VERTICAL_SLICE, HORIZONTAL_SLICE)
-        assert np.allclose(vectorized_pattern, PATTERN - np.max(PATTERN), rtol=1e-6)
+    def test_exponential(
+        self,
+        slice_xz: npt.NDArray[np.floating],
+        slice_xy: npt.NDArray[np.floating],
+        intensity: npt.NDArray[np.floating],
+    ):
+        slice_xz, slice_xy = slice_xz.squeeze(), slice_xy.squeeze()
+        vectorized_pattern = exponential(slice_xz, slice_xy)
+        assert np.allclose(vectorized_pattern, intensity - np.max(intensity), rtol=1e-6)
