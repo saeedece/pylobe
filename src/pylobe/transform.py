@@ -1,36 +1,33 @@
 import numpy as np
+import numpy.typing as npt
 from scipy.interpolate import RegularGridInterpolator  # pyright: ignore[reportMissingTypeStubs]
 
 from .utils import (
     Axis,
     cartesian_to_spherical,
-    FloatArray,
-    FullPattern,
-    HorizontalSlice,
     Plane,
     rotate_cartesian,
     spherical_to_cartesian,
     unpad,
-    VerticalSlice,
 )
 
 
 def rotate_pattern_bilinear(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     angles: list[float],
     axes: list[Axis],
-) -> FullPattern:
-    r"""Rotates a NumPy array representing a 3-D gain (FullPattern) pattern given a list of angles and axes using a regular grid interpolator.
+) -> npt.NDArray[np.floating]:
+    r"""Rotates a NumPy array representing a 3-D gain (npt.NDArray[np.floating]) pattern given a list of angles and axes using a regular grid interpolator.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     angles : list[float]
     axes : list[Axis]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     # pad pattern to include phi = 2 * pi just for interpolation
     # this is because rotated patterns can have phi in [2pi - 2pi/phi_resolution, 2pi)
@@ -62,19 +59,21 @@ def rotate_pattern_bilinear(
     return unpad(pattern_rotated, pad_widths=[(0, 1), (0, 0)])  # pyright: ignore[reportUnknownArgumentType]
 
 
-def linear_to_db(pattern: FullPattern, clip_value: float = -60) -> FullPattern:
+def linear_to_db(
+    pattern: npt.NDArray[np.floating], clip_value: float = -60
+) -> npt.NDArray[np.floating]:
     r"""Converts a NumPy array representing a linear-scale far-field pattern to a logarithmic-scale far-field pattern.
 
     We enforce a clip value to be set to deal with zeros in the linear pattern.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     clip_values: float
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     out_pattern = np.ones_like(pattern) * (clip_value / 10.0)
     _ = np.log10(pattern, out_pattern, where=(pattern != 0), dtype=pattern.dtype)  # pyright: ignore[reportAny]
@@ -83,36 +82,36 @@ def linear_to_db(pattern: FullPattern, clip_value: float = -60) -> FullPattern:
     return out_pattern
 
 
-def db_to_linear(pattern: FullPattern) -> FullPattern:
+def db_to_linear(pattern: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
     r"""Converts a NumPy array representing a logarithmic-scale far-field pattern to a linear-scale far-field pattern.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     return np.power(10, (1 / 10) * pattern)
 
 
 def unit_normalize_db_pattern(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     clip_value: float = -60,
-) -> FullPattern:
+) -> npt.NDArray[np.floating]:
     r"""Normalize a NumPy array representing a logarithmic-scale far-field pattern to a range of [0, 1].
 
     A clipping value is used to set the minimum value of the logarithmic-scaled pattern, which is necessary for minmax normalization.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     clip_value : float
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     # normalize dB pattern to (-inf, 0]
     out_pattern = pattern - np.max(pattern)
@@ -122,40 +121,40 @@ def unit_normalize_db_pattern(
 
 
 def unit_denormalize_db_pattern(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     clip_value: float = -60,
-) -> FullPattern:
+) -> npt.NDArray[np.floating]:
     r"""Reverse the normalization of a NumPy array representing a logarithmic-scale far-field pattern to a range of [0, 1].
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     clip_value: float
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     return clip_value - clip_value * pattern
 
 
 def extract_phi_plane(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     phi: float,
     endpoint: bool = False,
-) -> VerticalSlice:
+) -> npt.NDArray[np.floating]:
     r"""Extracts a slice lying on a single phi-plane from a 3-D pattern.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     phi : float
     endpoint : bool
         Whether to include the point at theta = 2pi.
 
     Returns
     -------
-    VerticalSlice
+    npt.NDArray[np.floating]
 
     Raises
     ------
@@ -177,22 +176,22 @@ def extract_phi_plane(
 
 
 def extract_theta_cone(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     theta: float,
     endpoint: bool = False,
-) -> HorizontalSlice:
+) -> npt.NDArray[np.floating]:
     r"""Extracts a slice lying on a single theta cone from a 3-D pattern.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     theta : float
     endpoint : bool
         Whether to include the point at phi = 2pi.
 
     Returns
     -------
-    HorizontalSlice
+    npt.NDArray[np.floating]
 
     Raises
     ------
@@ -210,20 +209,20 @@ def extract_theta_cone(
 
 
 def pad_spherical(
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     pad_widths: list[tuple[int, int]],
-) -> FloatArray:
+) -> npt.NDArray[np.floating]:
     r"""Pads a 3-D pattern while preserving spherical properties.
 
     Parameters
     ----------
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     pad_widths : list[tuple[int, int]]
         Two widths must be defined for each dimension.
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     phi_resolution = pattern.shape[-1]
     top_lft = pattern[..., 1 : pad_widths[0][0] + 1, : phi_resolution // 2]
@@ -240,22 +239,26 @@ def pad_spherical(
 
     ndim_pad_widths = [(0, 0) for _ in range(pattern.ndim)]
     ndim_pad_widths[-1] = pad_widths[-1]
+    import numpy.typing as npt
 
     out_pattern = np.pad(out_pattern, pad_width=ndim_pad_widths, mode="wrap")
     return out_pattern
 
 
-def mask(pattern: FullPattern, planes: set[Plane]) -> FloatArray:
+def mask(
+    pattern: npt.NDArray[np.floating], planes: set[Plane]
+) -> npt.NDArray[np.floating]:
     r"""Zero-masks a pattern such that only points on planes are shown.
 
     Parameters
     ----------
-    pattern : FullPattern
+    import numpy.typing as npt
+    pattern : npt.NDArray[np.floating]
     planes : set[Plane]
 
     Returns
     -------
-    FloatArray
+    npt.NDArray[np.floating]
     """
     theta_resolution, phi_resolution = pattern.shape[-2:]
 

@@ -5,6 +5,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.colors import Normalize
@@ -12,22 +13,15 @@ from matplotlib.projections.polar import PolarAxes
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-from .utils import (
-    AnyArray,
-    CoordinateGrid,
-    FullPattern,
-    HorizontalSlice,
-    SphericalAxis,
-    VerticalSlice,
-)
+from .utils import SphericalAxis
 
 plt.rcParams.update({"font.size": 12})
 
 
 def plot_axis_polar(
     ax: PolarAxes,
-    domain: tuple[SphericalAxis, AnyArray],
-    ranges: dict[str, VerticalSlice | HorizontalSlice],
+    domain: tuple[SphericalAxis, npt.NDArray[np.floating]],
+    ranges: dict[str, npt.NDArray[np.floating] | npt.NDArray[np.floating]],
     vlimits: tuple[float, float],
     modifiers: dict[str, dict[Any, Any]] | None = None,
     plot_legend: bool = False,
@@ -42,7 +36,7 @@ def plot_axis_polar(
         The polar axes to be modified in-place.
     domain : tuple[SphericalAxis, FloatArray]
         The domain is defined by the values of the independent variable and whether the variable is phi or theta. This allows us to correctly orient the polar axis.
-    ranges : dict[str, VerticalSlice | HorizontalSlice]
+    ranges : dict[str, npt.NDArray[np.floating] | npt.NDArray[np.floating]]
         The ranges are the slices to plot. Each slice is labelled in the case that a legend must be plotted.
     vlimits : tuple[float, float]
         The minimum and maxmimum values of the r axis. Ideally, this range should contain the range of all the slices in `ranges`. `0 <= vlimits[0] <= vlimits[1]`. It is the user's responsiblity to properly normalize prior to plotting.
@@ -92,9 +86,9 @@ def plot_axis_polar(
 
 def plot_axis_spherical(
     ax: Axes3D,
-    phi_grid: CoordinateGrid,
-    theta_grid: CoordinateGrid,
-    pattern: FullPattern,
+    phi_grid: npt.NDArray[np.floating],
+    theta_grid: npt.NDArray[np.floating],
+    pattern: npt.NDArray[np.floating],
     vlimits: tuple[float, float],
     visible_axes: bool = False,
 ) -> Poly3DCollection:
@@ -104,9 +98,9 @@ def plot_axis_spherical(
     ----------
     ax : Axes3D
         The 3-D axes to be modified in-place.
-    phi_grid : CoordinateGrid
-    theta_grid : CoordinateGrid
-    pattern : FullPattern
+    phi_grid : npt.NDArray[np.floating]
+    theta_grid : npt.NDArray[np.floating]
+    pattern : npt.NDArray[np.floating]
     vlimits : tuple[float, float]
         The minimum and maxmimum values of each axis. `vlimits` should be set such that the entire pattern is visualized. `0 <= vlimits[0] <= vlimits[1]`. It is the user's responsiblity to properly normalize prior to plotting.
     visible_axes : bool
@@ -142,7 +136,7 @@ def plot_axis_spherical(
 
 def plot_axis_planar(
     ax: Axes,
-    pattern: FullPattern,
+    pattern: npt.NDArray[np.floating],
     vlimits: tuple[float, float],
     extent: tuple[float, float, float, float] | None = None,
 ) -> AxesImage:
@@ -152,7 +146,7 @@ def plot_axis_planar(
     ----------
     ax : Axes
         The 2-D axes to be modified in-place.
-    pattern : FullPattern
+    pattern : npt.NDArray[np.floating]
     vlimits : tuple[float, float]
         The minimum and maxmimum values of each axis. `vlimits` should be set such that the entire pattern is visualized.
     extent : tuple[float, float, float, float] | None

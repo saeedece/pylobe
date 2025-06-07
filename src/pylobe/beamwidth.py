@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-from .utils import VerticalSlice, HorizontalSlice, SphericalAxis
+from .utils import SphericalAxis
 
 
 def _longest_subsequence(arr: npt.NDArray[np.bool]) -> int:
@@ -24,7 +24,7 @@ def _longest_subsequence(arr: npt.NDArray[np.bool]) -> int:
 
 
 def compute(
-    pattern_slice: VerticalSlice | HorizontalSlice,
+    pattern_slice: npt.NDArray[np.floating],
     axis: SphericalAxis,
     threshold: float = 3,
 ) -> float:
@@ -34,7 +34,7 @@ def compute(
 
     Parameters
     ----------
-    pattern_slice : VerticalSlice | HorizontalSlice
+    pattern_slice : npt.NDArray[np.floating]
     axis : SphericalAxis
         Needed for proper wrapping of slices.
     threshold : float

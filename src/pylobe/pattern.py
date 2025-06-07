@@ -1,32 +1,31 @@
 import numpy as np
-
-from .utils import AnyArray, CoordinateGrid, FullPattern
+import numpy.typing as npt
 
 
 def linear_array_factor(
-    theta_grid: CoordinateGrid,
-    kd: np.complex64 | np.complex128 | np.complex256,
-    beta: AnyArray,
+    theta_grid: npt.NDArray[np.floating],
+    kd: np.complexfloating,
+    beta: npt.NDArray[np.complexfloating],
     num_elements: int,
-) -> AnyArray:
+) -> npt.NDArray[np.complexfloating]:
     r"""Computes a linear array factor.
 
     The linear array is assumed to be oriented along the z-axis. This results in the array factor having no phi-dependence.
 
     Parameters
     ----------
-    theta_grid : CoordinateGrid
+    theta_grid : npt.NDArray[np.floating]
     kd : np.complex64 | np.complex128 | np.complex256
         Constant displacement between each array element scaled by the wave number.
-    beta : AnyArray
+    beta : npt.NDArray[np.complexfloating]
         Phase between each array element.
     num_elements:
         Number of elements forming the linear array.
 
     Returns
     -------
-    AnyArray
-        The array is complex-valued, but we annotate it as AnyArray because I am lazy.
+    npt.NDArray[np.complexfloating]
+        The array is complex-valued, but we annotate it as npt.NDArray[np.complexfloating] because I am lazy.
     """
     psi = kd * np.cos(theta_grid) + beta.reshape(
         beta.size,
@@ -39,46 +38,46 @@ def linear_array_factor(
 
 
 def planar_array_factor(
-    theta_grid: CoordinateGrid,
-    phi_grid: CoordinateGrid,
+    theta_grid: npt.NDArray[np.floating],
+    phi_grid: npt.NDArray[np.floating],
     m: int,
     kdx: np.complex64 | np.complex128 | np.complex256,
-    betax: AnyArray,
-    im1: AnyArray,
+    betax: npt.NDArray[np.complexfloating],
+    im1: npt.NDArray[np.complexfloating],
     n: int,
     kdy: np.complex64 | np.complex128 | np.complex256,
-    betay: AnyArray,
-    i1n: AnyArray,
-) -> AnyArray:
+    betay: npt.NDArray[np.complexfloating],
+    i1n: npt.NDArray[np.complexfloating],
+) -> npt.NDArray[np.complexfloating]:
     r"""Computes a planar array factor.
 
     The planar array is assumed to be oriented along the xy-plane.
 
     Parameters
     ----------
-    theta_grid : CoordinateGrid
-    phi_grid : CoordinateGrid
+    theta_grid : npt.NDArray[np.floating]
+    phi_grid : npt.NDArray[np.floating]
     kdx : np.complex64 | np.complex128 | np.complex256
         Constant displacement between each array element scaled by the wave number along the x-axis.
-    betax : AnyArray
+    betax : npt.NDArray[np.complexfloating]
         Phase between each array element along the x-axis.
-    im1 : AnyArray
+    im1 : npt.NDArray[np.complexfloating]
         Excitation coefficient of each array element along the x-axis.
     m : int
         Number of array elements along the x-axis.
     kdy : np.complex64 | np.complex128 | np.complex256
         Constant displacement between each array element scaled by the wave number along the y-axis.
-    betay : AnyArray
+    betay : npt.NDArray[np.complexfloating]
         Phase between each array element along the y-axis.
-    i1n : AnyArray
+    i1n : npt.NDArray[np.complexfloating]
         Excitation coefficient of each array element along the y-axis.
     n : int
         Number of array elements along the y-axis.
 
     Returns
     -------
-    AnyArray
-        The array is complex-valued, but we annotate it as AnyArray because I am lazy.
+    npt.NDArray[np.complexfloating]
+        The array is complex-valued, but we annotate it as npt.NDArray[np.complexfloating] because I am lazy.
     """
     added_dims = tuple(1 for _ in range(theta_grid.ndim))
 
@@ -95,27 +94,23 @@ def planar_array_factor(
 
     sxm = np.sum(im1 * np.exp(1j * ms * psix), axis=0)  # pyright: ignore[reportAny]
     syn = np.sum(i1n * np.exp(1j * ns * psiy), axis=0)  # pyright: ignore[reportAny]
-    return sxm * syn  # pyright: ignore[reportAny]
 
 
 def gain_model_directive(
-    theta_grid: CoordinateGrid,
+    theta_grid: npt.NDArray[np.floating],
     alpha: float,
-    beta: float = 0,
-) -> FullPattern:
+) -> npt.NDArray[np.floating]:
     r"""Computes a simple directive gain model.
 
-    Parameters
-    ----------
-    theta_grid : CoordinateGrid
-    alpha : float
+     Parameters
+     ----------
+     theta_grid : npt.NDArray[np.floating]
         Normalization factor.
-    beta : float
-        Constant gain value for southern hemisphere.
+     beta : float
+         Constant gain value for southern hemisphere.
 
-    Returns
-    -------
-    FullPattern
+     Returns
+    npt.NDArray[np.floating]
     """
     gain = beta * np.ones_like(theta_grid)
     gain[theta_grid <= np.pi / 2] = (

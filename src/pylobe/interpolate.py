@@ -1,22 +1,23 @@
 import numpy as np
+import numpy.typing as npt
 
-from .utils import FullPattern, HorizontalSlice, VerticalSlice, build_equiangular_grid
+from .utils import build_equiangular_grid
 
 
 def summing(
-    vertical_slice: VerticalSlice,
-    horizonal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizonal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     r"""Interpolate a full 3-D pattern from a vertical and horizontal slice using the summing algorithm.
 
     Parameters
     ----------
-    vertical_slice : VerticalSlice
-    horizontal_slice : HorizontalSlice
+    vertical_slice : npt.NDArray[np.floating]
+    horizontal_slice : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     theta_resolution = (vertical_slice.size // 2) + 1
     return 0.5 * (
@@ -25,19 +26,19 @@ def summing(
 
 
 def bilinear(
-    vertical_slice: VerticalSlice,
-    horizonal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizonal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     r"""Interpolate a full 3-D pattern from a vertical and horizontal slice using the bilinear algorithm.
 
     Parameters
     ----------
-    vertical_slice : VerticalSlice
-    horizontal_slice : HorizontalSlice
+    vertical_slice : npt.NDArray[np.floating]
+    horizontal_slice : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     phi_resolution = horizonal_slice.size
     theta_resolution = (vertical_slice.size // 2) + 1
@@ -78,19 +79,19 @@ def bilinear(
 
 
 def weighted_bilinear(
-    vertical_slice: VerticalSlice,
-    horizonal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizonal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     r"""Interpolate a full 3-D pattern from a vertical and horizontal slice using the weighted bilinear algorithm.
 
     Parameters
     ----------
-    vertical_slice : VerticalSlice
-    horizontal_slice : HorizontalSlice
+    vertical_slice : npt.NDArray[np.floating]
+    horizontal_slice : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     phi_resolution = horizonal_slice.size
     theta_resolution = (vertical_slice.size // 2) + 1
@@ -145,21 +146,21 @@ def weighted_bilinear(
 
 
 def horizontal_projection(
-    vertical_slice: VerticalSlice,
-    horizonal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizonal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     r"""Interpolate a full 3-D pattern from a vertical and horizontal slice using the horizontal projection algorithm.
 
     Altair's equation for HPI uses (azimuth, elevation) rather than (phi, theta) -> Gh(0) = Gv(0); Gh(pi) = Gv(pi).
 
     Parameters
     ----------
-    vertical_slice : VerticalSlice
-    horizontal_slice : HorizontalSlice
+    vertical_slice : npt.NDArray[np.floating]
+    horizontal_slice : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     phi_resolution = horizonal_slice.size
     theta_resolution = (vertical_slice.size // 2) + 1
@@ -189,19 +190,19 @@ def horizontal_projection(
 
 
 def exponential(
-    vertical_slice: VerticalSlice,
-    horizonal_slice: HorizontalSlice,
-) -> FullPattern:
+    vertical_slice: npt.NDArray[np.floating],
+    horizonal_slice: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
     r"""Interpolate a full 3-D pattern from a vertical and horizontal slice using the exponential algorithm.
 
     Parameters
     ----------
-    vertical_slice : VerticalSlice
-    horizontal_slice : HorizontalSlice
+    vertical_slice : npt.NDArray[np.floating]
+    horizontal_slice : npt.NDArray[np.floating]
 
     Returns
     -------
-    FullPattern
+    npt.NDArray[np.floating]
     """
     theta_resolution = (vertical_slice.size // 2) + 1
 
