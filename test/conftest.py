@@ -22,7 +22,7 @@ def factor():
     return linear_array_factor(
         theta_grid=build_equiangular_grid()[1],
         kd=np.complex64(1.0),
-        beta=np.zeros(shape=(1,)),
+        beta=np.zeros(shape=(1,), dtype=np.complex64),
         num_elements=5,
     )
 
@@ -33,7 +33,7 @@ def intensity_linear_scale(factor: npt.NDArray[np.complexfloating]):
 
 
 @pytest.fixture()
-def intensity(intensity_linear_scale: npt.NDArray[np.complexfloating]):
+def intensity(intensity_linear_scale: npt.NDArray[np.floating]):
     return linear_to_db(intensity_linear_scale, clip_value=-60)
 
 
@@ -54,7 +54,8 @@ def slice_yz(intensity: npt.NDArray[np.floating]):
 
 @pytest.fixture()
 def intensity_norm(intensity):
-    return unit_normalize_db_pattern(intensity)
+    return intensity - np.max(intensity)
+    # return unit_normalize_db_pattern(intensity)
 
 
 @pytest.fixture()

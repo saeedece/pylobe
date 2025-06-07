@@ -57,10 +57,10 @@ def bilinear(
     equator = horizonal_slice[np.newaxis, :]
 
     theta = np.linspace(0, np.pi, theta_resolution)
-    equator_dist = theta
-    equator_dist[theta >= np.pi / 2] = np.pi - theta[theta >= np.pi / 2]
-    equator_dist = equator_dist[:, np.newaxis]
-    pole_dist = np.pi / 2 - equator_dist
+    pole_dist = theta
+    pole_dist[theta >= np.pi / 2] = np.pi - theta[theta >= np.pi / 2]
+    pole_dist = pole_dist[:, np.newaxis]
+    equator_dist = np.pi / 2 - pole_dist
 
     north_pole = vertical_slice[0]  # pyright: ignore[reportAny]
     south_pole = vertical_slice[theta_resolution - 1]  # pyright: ignore[reportAny]
@@ -111,10 +111,10 @@ def weighted_bilinear(
     equator = horizonal_slice[np.newaxis, :]
 
     theta = np.linspace(0, np.pi, theta_resolution)
-    equator_dist = theta
-    equator_dist[theta >= np.pi / 2] = np.pi - theta[theta >= np.pi / 2]
-    equator_dist = equator_dist[:, np.newaxis]
-    pole_dist = np.pi / 2 - equator_dist
+    pole_dist = theta
+    pole_dist[theta >= np.pi / 2] = np.pi - theta[theta >= np.pi / 2]
+    pole_dist = pole_dist[:, np.newaxis]
+    equator_dist = np.pi / 2 - pole_dist
 
     north_pole = vertical_slice[0]  # pyright: ignore[reportAny]
     south_pole = vertical_slice[theta_resolution - 1]  # pyright: ignore[reportAny]
@@ -139,9 +139,12 @@ def weighted_bilinear(
     nan_mask = np.isnan(full_pattern)
     full_pattern[nan_mask & (theta_grid == 0)] = north_pole
     full_pattern[nan_mask & (theta_grid == np.pi)] = south_pole
-    full_pattern[nan_mask & (phi_grid == 0)] = horizonal_slice[0]
-    full_pattern[nan_mask & (phi_grid == np.pi)] = horizonal_slice[phi_resolution // 2]
-
+    full_pattern[nan_mask & (theta_grid == np.pi / 2) & (phi_grid == 0)] = (
+        horizonal_slice[0]
+    )
+    full_pattern[nan_mask & (theta_grid == np.pi / 2) & (phi_grid == np.pi)] = (
+        horizonal_slice[phi_resolution // 2]
+    )
     return full_pattern
 
 
@@ -165,6 +168,7 @@ def horizontal_projection(
     phi_resolution = horizonal_slice.size
     theta_resolution = (vertical_slice.size // 2) + 1
 
+    vertical_slice = np.roll(vertical_slice, shift=(theta_resolution - 1) // 2)
     fnt_plane = vertical_slice[:theta_resolution, np.newaxis]
     bck_plane = np.flip(
         np.concatenate((vertical_slice[theta_resolution - 1 :], vertical_slice[0:1]))
