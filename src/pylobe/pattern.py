@@ -94,11 +94,13 @@ def planar_array_factor(
 
     sxm = np.sum(im1 * np.exp(1j * ms * psix), axis=0)  # pyright: ignore[reportAny]
     syn = np.sum(i1n * np.exp(1j * ns * psiy), axis=0)  # pyright: ignore[reportAny]
+    return sxm * syn  # pyright: ignore[reportAny]
 
 
 def gain_model_directive(
     theta_grid: npt.NDArray[np.floating],
     alpha: float,
+    beta: float,
 ) -> npt.NDArray[np.floating]:
     r"""Computes a simple directive gain model.
 
