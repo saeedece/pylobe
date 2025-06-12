@@ -1,11 +1,37 @@
 from pathlib import Path
 
+import pytest
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt
 
+from pylobe.transform import (
+    extract_phi_plane,
+    extract_theta_cone,
+    unit_normalize_db_pattern,
+)
 from pylobe.utils import build_equiangular_grid, SphericalAxis
 from pylobe.visualize import plot_axis_polar, plot_axis_spherical, plot_axis_planar
+
+
+@pytest.fixture()
+def intensity_norm(intensity):
+    return unit_normalize_db_pattern(intensity)
+
+
+@pytest.fixture()
+def slice_xy_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_theta_cone(intensity_norm, np.pi / 2, endpoint=False)
+
+
+@pytest.fixture()
+def slice_xz_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_phi_plane(intensity_norm, 0, endpoint=False)
+
+
+@pytest.fixture()
+def slice_yz_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_phi_plane(intensity_norm, np.pi / 2, endpoint=False)
 
 
 class TestVisualize:

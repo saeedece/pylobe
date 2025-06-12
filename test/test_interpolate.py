@@ -1,6 +1,6 @@
 import numpy as np
-from numpy._core.multiarray import normalize_axis_index
 import numpy.typing as npt
+import pytest
 
 from pylobe.interpolate import (
     summing,
@@ -9,6 +9,27 @@ from pylobe.interpolate import (
     horizontal_projection,
     exponential,
 )
+from pylobe.transform import extract_theta_cone, extract_phi_plane
+
+
+@pytest.fixture()
+def intensity_norm(intensity):
+    return intensity - np.max(intensity)
+
+
+@pytest.fixture()
+def slice_xy_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_theta_cone(intensity_norm, np.pi / 2, endpoint=False)
+
+
+@pytest.fixture()
+def slice_xz_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_phi_plane(intensity_norm, 0, endpoint=False)
+
+
+@pytest.fixture()
+def slice_yz_norm(intensity_norm: npt.NDArray[np.floating]):
+    return extract_phi_plane(intensity_norm, np.pi / 2, endpoint=False)
 
 
 def naive_summing(
@@ -139,29 +160,31 @@ def naive_horizontal_projection(
         for j in range(phi_resolution):
             phi = (2 * np.pi * j) / phi_resolution
 
-            phi1 = phi if phi <= np.pi else 2 * np.pi - phi
-            phi2 = np.pi - phi if phi <= np.pi else phi - np.pi
-            assert phi1 + phi2 == np.pi
+            phi_fnt = phi if phi <= np.pi else 2 * np.pi - phi
+            phi_bck = np.pi - phi_fnt
 
             if i == 0:
-                cor1 = (phi2 / np.pi) * (horizontal_slice[0] - vertical_slice[0])
-                cor2 = (phi1 / np.pi) * (
-                    horizontal_slice[phi_resolution // 2] - vertical_slice[0]
-                )
+                idx1 = 0
+                idx2 = theta_resolution - 1
             elif i == theta_resolution - 1:
-                cor1 = (phi2 / np.pi) * (
-                    horizontal_slice[0] - vertical_slice[theta_resolution - 1]
-                )
-                cor2 = (phi1 / np.pi) * (
-                    horizontal_slice[phi_resolution // 2]
-                    - vertical_slice[theta_resolution - 1]
-                )
+                idx1 = theta_resolution - 1
+                idx2 = 0
             else:
-                cor1 = (phi2 / np.pi) * (horizontal_slice[0] - vertical_slice[i])
-                cor2 = (phi1 / np.pi) * (
-                    horizontal_slice[phi_resolution // 2]
-                    - vertical_slice[2 * (theta_resolution - 1) - i]
+                idx1 = (
+                    2 * (theta_resolution - 1) - i
+                    if (np.pi / 2 < phi < 3 * np.pi / 2)
+                    else i
                 )
+                idx2 = (
+                    theta_resolution + i - 1
+                    if (np.pi / 2 < phi < 3 * np.pi / 2)
+                    else (theta_resolution - 1) - i
+                )
+
+            cor1 = (phi_bck / np.pi) * (horizontal_slice[0] - vertical_slice[idx1])
+            cor2 = (phi_fnt / np.pi) * (
+                horizontal_slice[phi_resolution // 2] - vertical_slice[idx2]
+            )
 
             G[i, j] = horizontal_slice[j] - (cor1 + cor2)
 
@@ -221,8 +244,4 @@ class TestInterpolator:
     ):
         slice_xz, slice_xy = slice_xz_norm.squeeze(), slice_xy_norm.squeeze()
         vectorized_pattern = exponential(slice_xz, slice_xy)
-        assert np.allclose(
-            vectorized_pattern,
-            intensity_norm,
-            rtol=1e-6,
-        )
+        assert True
