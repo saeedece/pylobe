@@ -168,16 +168,14 @@ def horizontal_projection(
     phi_resolution = horizonal_slice.size
     theta_resolution = (vertical_slice.size // 2) + 1
 
-    vertical_slice = np.roll(vertical_slice, shift=(theta_resolution - 1) // 2)
-    fnt_plane = vertical_slice[:theta_resolution, np.newaxis]
-    bck_plane = np.flip(
+    top_plane = vertical_slice[:theta_resolution, np.newaxis]
+    top_plane[:, phi_resolution // 4 : 3 * phi_resolution // 4] = np.flip(
         np.concatenate((vertical_slice[theta_resolution - 1 :], vertical_slice[0:1]))
     )[:, np.newaxis]
 
-    equator = horizonal_slice[np.newaxis, :]
+    bot_plane = np.flip(top_plane, axis=0)
 
-    north_pole = vertical_slice[0]  # pyright: ignore[reportAny]
-    south_pole = vertical_slice[theta_resolution - 1]  # pyright: ignore[reportAny]
+    equator = horizonal_slice[np.newaxis, :]
 
     phi = np.linspace(0, 2 * np.pi, phi_resolution, endpoint=False)
     norm_fnt_plane_dist = phi
@@ -186,8 +184,8 @@ def horizontal_projection(
     norm_bck_plane_dist = 1 - norm_fnt_plane_dist
 
     full_pattern = equator - (  # pyright: ignore[reportAny]
-        norm_bck_plane_dist * (north_pole - fnt_plane)
-        + norm_fnt_plane_dist * (south_pole - bck_plane)
+        norm_bck_plane_dist * (horizonal_slice[0] - top_plane)
+        + norm_fnt_plane_dist * (horizonal_slice[phi_resolution // 2] - bot_plane)
     )
 
     return full_pattern  # pyright: ignore[reportAny]
