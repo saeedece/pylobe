@@ -81,8 +81,8 @@ def planar_array_factor(
     """
     added_dims = tuple(1 for _ in range(theta_grid.ndim))
 
-    betax = betax.reshape(betax.shape, *added_dims)
-    betay = betay.reshape(betay.shape, *added_dims)
+    betax = betax.reshape(*betax.shape, *added_dims)
+    betay = betay.reshape(*betay.shape, *added_dims)
 
     psix = kdx * np.sin(theta_grid) * np.cos(phi_grid) + betax
     psiy = kdy * np.sin(theta_grid) * np.sin(phi_grid) + betay
