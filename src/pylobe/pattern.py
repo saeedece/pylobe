@@ -41,11 +41,11 @@ def planar_array_factor(
     theta_grid: npt.NDArray[np.floating],
     phi_grid: npt.NDArray[np.floating],
     m: int,
-    kdx: np.complex64 | np.complex128 | np.complex256,
+    kdx: np.complexfloating,
     betax: npt.NDArray[np.complexfloating],
     im1: npt.NDArray[np.complexfloating],
     n: int,
-    kdy: np.complex64 | np.complex128 | np.complex256,
+    kdy: np.complexfloating,
     betay: npt.NDArray[np.complexfloating],
     i1n: npt.NDArray[np.complexfloating],
 ) -> npt.NDArray[np.complexfloating]:
@@ -89,7 +89,13 @@ def planar_array_factor(
 
     ms = np.arange(m).reshape(m, *added_dims)
     ns = np.arange(n).reshape(n, *added_dims)
+
+    if im1.size == 1:
+        im1 = np.repeat(im1, m)
     im1 = im1.reshape(m, *added_dims)
+
+    if i1n.size == 1:
+        i1n = np.repeat(i1n, n)
     i1n = i1n.reshape(n, *added_dims)
 
     sxm = np.sum(im1 * np.exp(1j * ms * psix), axis=0)  # pyright: ignore[reportAny]

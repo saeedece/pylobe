@@ -25,11 +25,11 @@ def factor():
         m=5,
         kdx=np.complex64(5 * np.pi / 7),
         betax=np.zeros(shape=(1,), dtype=np.complex64),
-        im1=np.ones(shape=(5,), dtype=np.complex64),
+        im1=np.ones(shape=(1,), dtype=np.complex64),
         n=3,
         kdy=np.complex64(np.pi / 2),
         betay=np.zeros(shape=(1,), dtype=np.complex64),
-        i1n=np.ones(shape=(3,), dtype=np.complex64),
+        i1n=np.ones(shape=(1,), dtype=np.complex64),
     )
 
 
